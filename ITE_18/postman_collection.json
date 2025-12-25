@@ -1,0 +1,195 @@
+{
+  "info": {
+    "name": "Pet adoption",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "ite18-collection-0001"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8000/api" },
+    { "key": "token", "value": "" },
+    { "key": "adminId", "value": "1" },
+    { "key": "shelterId", "value": "1" },
+    { "key": "petId", "value": "1" },
+    { "key": "adopterId", "value": "1" },
+    { "key": "adoptionId", "value": "1" },
+    { "key": "vetId", "value": "1" },
+    { "key": "filePath", "value": "public/pet-photos/pet_1_1640995200.jpg" },
+    { "key": "listType", "value": "pet-photos" }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Admin Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/auth/admin/login", "host": ["{{baseUrl}}"], "path": ["auth","admin","login"] },
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"password123\"\n}" }
+          }
+        },
+        {
+          "name": "Adopter Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/auth/adopter/login", "host": ["{{baseUrl}}"], "path": ["auth","adopter","login"] },
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"adopter@example.com\"\n}" }
+          }
+        },
+        {
+          "name": "Me",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ],
+            "url": { "raw": "{{baseUrl}}/auth/me", "host": ["{{baseUrl}}"], "path": ["auth","me"] }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ],
+            "url": { "raw": "{{baseUrl}}/auth/logout", "host": ["{{baseUrl}}"], "path": ["auth","logout"] }
+          }
+        },
+        {
+          "name": "Logout All",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ],
+            "url": { "raw": "{{baseUrl}}/auth/logout-all", "host": ["{{baseUrl}}"], "path": ["auth","logout-all"] }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ],
+            "url": { "raw": "{{baseUrl}}/auth/refresh", "host": ["{{baseUrl}}"], "path": ["auth","refresh"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admins (Admin Only)",
+      "item": [
+        {
+          "name": "List Admins",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/admins", "host": ["{{baseUrl}}"], "path": ["admins"] } }
+        },
+        {
+          "name": "Get Admin",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/admins/{{adminId}}", "host": ["{{baseUrl}}"], "path": ["admins","{{adminId}}"] } }
+        },
+        {
+          "name": "Register Admin",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ],
+            "url": { "raw": "{{baseUrl}}/admins/register", "host": ["{{baseUrl}}"], "path": ["admins","register"] },
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"New Admin\",\n  \"email\": \"newadmin@example.com\",\n  \"password\": \"password123\",\n  \"phone\": \"+1234567890\",\n  \"shelter\": {\n    \"shelter_name\": \"New Shelter\",\n    \"location\": \"123 Main St\"\n  }\n}" }
+          }
+        },
+        {
+          "name": "Update Admin",
+          "request": { "method": "PUT", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/admins/{{adminId}}", "host": ["{{baseUrl}}"], "path": ["admins","{{adminId}}"] }, "body": { "mode": "raw", "raw": "{\n  \"name\": \"Updated Name\"\n}" } }
+        },
+        {
+          "name": "Delete Admin",
+          "request": { "method": "DELETE", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/admins/{{adminId}}", "host": ["{{baseUrl}}"], "path": ["admins","{{adminId}}"] } }
+        },
+        {
+          "name": "Admin Shelters",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/admins/{{adminId}}/shelters", "host": ["{{baseUrl}}"], "path": ["admins","{{adminId}}","shelters"] } }
+        }
+      ]
+    },
+    {
+      "name": "Shelters",
+      "item": [
+        { "name": "List Shelters", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/shelters", "host": ["{{baseUrl}}"], "path": ["shelters"] } } },
+        { "name": "Get Shelter", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/shelters/{{shelterId}}", "host": ["{{baseUrl}}"], "path": ["shelters","{{shelterId}}"] } } },
+        { "name": "Create Shelter", "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/shelters", "host": ["{{baseUrl}}"], "path": ["shelters"] }, "body": { "mode": "raw", "raw": "{\n  \"admin_id\": 1,\n  \"shelter_name\": \"New Shelter\"\n}" } } },
+        { "name": "Update Shelter", "request": { "method": "PUT", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/shelters/{{shelterId}}", "host": ["{{baseUrl}}"], "path": ["shelters","{{shelterId}}"] }, "body": { "mode": "raw", "raw": "{\n  \"shelter_name\": \"Updated Shelter\"\n}" } } },
+        { "name": "Delete Shelter", "request": { "method": "DELETE", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/shelters/{{shelterId}}", "host": ["{{baseUrl}}"], "path": ["shelters","{{shelterId}}"] } } }
+      ]
+    },
+    {
+      "name": "Pets",
+      "item": [
+        { "name": "List Pets", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/pets", "host": ["{{baseUrl}}"], "path": ["pets"] } } },
+        { "name": "Available Pets", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/pets/available", "host": ["{{baseUrl}}"], "path": ["pets","available"] } } },
+        { "name": "Reserved Pets", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/pets/reserved", "host": ["{{baseUrl}}"], "path": ["pets","reserved"] } } },
+        { "name": "Adopted Pets", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/pets/adopted", "host": ["{{baseUrl}}"], "path": ["pets","adopted"] } } },
+        { "name": "Get Pet", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/pets/{{petId}}", "host": ["{{baseUrl}}"], "path": ["pets","{{petId}}"] } } },
+        { "name": "Create Pet", "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/pets", "host": ["{{baseUrl}}"], "path": ["pets"] }, "body": { "mode": "raw", "raw": "{\n  \"shelter_id\": 1,\n  \"name\": \"Max\",\n  \"species\": \"Cat\"\n}" } } },
+        { "name": "Update Pet", "request": { "method": "PUT", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/pets/{{petId}}", "host": ["{{baseUrl}}"], "path": ["pets","{{petId}}"] }, "body": { "mode": "raw", "raw": "{\n  \"name\": \"Max Updated\"\n}" } } },
+        { "name": "Delete Pet", "request": { "method": "DELETE", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/pets/{{petId}}", "host": ["{{baseUrl}}"], "path": ["pets","{{petId}}"] } } }
+      ]
+    },
+    {
+      "name": "Adopters",
+      "item": [
+        { "name": "List Adopters", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/adopters", "host": ["{{baseUrl}}"], "path": ["adopters"] } } },
+        { "name": "Get Adopter", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/adopters/{{adopterId}}", "host": ["{{baseUrl}}"], "path": ["adopters","{{adopterId}}"] } } },
+        { "name": "Register Adopter", "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/adopters/register", "host": ["{{baseUrl}}"], "path": ["adopters","register"] }, "body": { "mode": "raw", "raw": "{\n  \"first_name\": \"New\",\n  \"last_name\": \"Adopter\",\n  \"email\": \"newadopter@example.com\"\n}" } } },
+        { "name": "Update Adopter", "request": { "method": "PUT", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/adopters/{{adopterId}}", "host": ["{{baseUrl}}"], "path": ["adopters","{{adopterId}}"] }, "body": { "mode": "raw", "raw": "{\n  \"phone\": \"+123456789\"\n}" } } },
+        { "name": "Delete Adopter", "request": { "method": "DELETE", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/adopters/{{adopterId}}", "host": ["{{baseUrl}}"], "path": ["adopters","{{adopterId}}"] } } }
+      ]
+    },
+    {
+      "name": "Adoptions",
+      "item": [
+        { "name": "List Adoptions", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/adoptions", "host": ["{{baseUrl}}"], "path": ["adoptions"] } } },
+        { "name": "Get Adoption", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/adoptions/{{adoptionId}}", "host": ["{{baseUrl}}"], "path": ["adoptions","{{adoptionId}}"] } } },
+        { "name": "Create Adoption", "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/adoptions", "host": ["{{baseUrl}}"], "path": ["adoptions"] }, "body": { "mode": "raw", "raw": "{\n  \"adopter_id\": 1,\n  \"pet_id\": 1,\n  \"application_date\": \"2024-01-15\",\n  \"meet_greet\": \"yes\",\n  \"reason_for_adoption\": \"Looking for a companion\"\n}" } } },
+        { "name": "Update Adoption Status", "request": { "method": "PATCH", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/adoptions/{{adoptionId}}/status", "host": ["{{baseUrl}}"], "path": ["adoptions","{{adoptionId}}","status"] }, "body": { "mode": "raw", "raw": "{\n  \"adoption_status\": \"approved\",\n  \"notes\": \"Approved\"\n}" } } },
+        { "name": "Update Interview", "request": { "method": "PATCH", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/adoptions/{{adoptionId}}/interview", "host": ["{{baseUrl}}"], "path": ["adoptions","{{adoptionId}}","interview"] }, "body": { "mode": "raw", "raw": "{\n  \"online_interview_date\": \"2024-01-25\",\n  \"online_interview_time\": \"15:00\",\n  \"meet_greet\": \"yes\"\n}" } } },
+        { "name": "Delete Adoption", "request": { "method": "DELETE", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/adoptions/{{adoptionId}}", "host": ["{{baseUrl}}"], "path": ["adoptions","{{adoptionId}}"] } } }
+      ]
+    },
+    {
+      "name": "Vet Visits",
+      "item": [
+        { "name": "List Vet Visits", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/vet-visits", "host": ["{{baseUrl}}"], "path": ["vet-visits"] } } },
+        { "name": "Get Vet Visit", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/vet-visits/{{vetId}}", "host": ["{{baseUrl}}"], "path": ["vet-visits","{{vetId}}"] } } },
+        { "name": "Create Vet Visit", "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/vet-visits", "host": ["{{baseUrl}}"], "path": ["vet-visits"] }, "body": { "mode": "raw", "raw": "{\n  \"pet_id\": 1,\n  \"vet_name\": \"Dr. Johnson\",\n  \"visit_date\": \"2024-01-15\",\n  \"purpose\": \"Health check\"\n}" } } },
+        { "name": "Update Vet Visit", "request": { "method": "PUT", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/vet-visits/{{vetId}}", "host": ["{{baseUrl}}"], "path": ["vet-visits","{{vetId}}"] }, "body": { "mode": "raw", "raw": "{\n  \"diagnosis\": \"Recovered\"\n}" } } },
+        { "name": "Delete Vet Visit", "request": { "method": "DELETE", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/vet-visits/{{vetId}}", "host": ["{{baseUrl}}"], "path": ["vet-visits","{{vetId}}"] } } }
+      ]
+    },
+    {
+      "name": "Reports",
+      "item": [
+        { "name": "Shelter Summary", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/reports/shelter/{{shelterId}}", "host": ["{{baseUrl}}"], "path": ["reports","shelter","{{shelterId}}"] } } },
+        { "name": "Pets Summary", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/reports/pets", "host": ["{{baseUrl}}"], "path": ["reports","pets"] } } }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        { "name": "List Notifications", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/notifications", "host": ["{{baseUrl}}"], "path": ["notifications"] } } },
+        { "name": "Get Notification", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/notifications/1", "host": ["{{baseUrl}}"], "path": ["notifications","1"] } } }
+      ]
+    },
+    {
+      "name": "Files",
+      "item": [
+        { "name": "Upload Pet Photo", "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/files/pet-photo", "host": ["{{baseUrl}}"], "path": ["files","pet-photo"] }, "body": { "mode": "formdata", "formdata": [ { "key": "file", "type": "file", "src": [] }, { "key": "pet_id", "value": "{{petId}}", "type": "text" } ] } } },
+        { "name": "Upload Adopter Document", "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/files/adopter-document", "host": ["{{baseUrl}}"], "path": ["files","adopter-document"] }, "body": { "mode": "formdata", "formdata": [ { "key": "file", "type": "file", "src": [] }, { "key": "adopter_id", "value": "{{adopterId}}", "type": "text" }, { "key": "document_type", "value": "valid_id", "type": "text" } ] } } },
+        { "name": "Upload Vet Document", "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/files/vet-document", "host": ["{{baseUrl}}"], "path": ["files","vet-document"] }, "body": { "mode": "formdata", "formdata": [ { "key": "file", "type": "file", "src": [] }, { "key": "vet_id", "value": "{{vetId}}", "type": "text" }, { "key": "document_type", "value": "diagnosis", "type": "text" } ] } } },
+        { "name": "Get File", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/files/get?path={{filePath}}", "host": ["{{baseUrl}}"], "path": ["files","get"], "query": [ { "key": "path", "value": "{{filePath}}" } ] } } },
+        { "name": "Delete File", "request": { "method": "DELETE", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/files/delete", "host": ["{{baseUrl}}"], "path": ["files","delete"] }, "body": { "mode": "raw", "raw": "{\n  \"path\": \"{{filePath}}\"\n}" } } },
+        { "name": "List Files", "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/files/list?type={{listType}}", "host": ["{{baseUrl}}"], "path": ["files","list"], "query": [ { "key": "type", "value": "{{listType}}" } ] } } }
+      ]
+    }
+  ]
+}
