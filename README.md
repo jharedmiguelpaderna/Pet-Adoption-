@@ -1,95 +1,87 @@
 ITE_18 — Project README
 
-# ⛺ Pet Adoption — Modern Pet Adoption Platform
+Quick Start (concise)
 
-A full-stack pet adoption application featuring a Laravel backend and a Next.js frontend, with features for shelters, pets, adopters, adoption requests, and veterinary visit tracking.
+1) Extract the folder
 
-![Pet Adoption](https://img.shields.io/badge/Pet-Adoption-78C000?style=for-the-badge)
-![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react)
-![TypeScript](https://img.shields.io/badge/TypeScript-5+-3178C6?style=for-the-badge&logo=typescript)
-![Laravel](https://img.shields.io/badge/Laravel-12-FF2D20?style=for-the-badge&logo=laravel)
-![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=for-the-badge&logo=mysql)
-![Inertia](https://img.shields.io/badge/Inertia.js-2.0-9553E9?style=for-the-badge)
+Extract to C:\xampp\htdocs\ITE_18 if using XAMPP/Apache, or extract anywhere (e.g. C:\Users\<you>\Documents\ITE_18) to use the built-in PHP dev server.
 
-## 🏗️ Project Structure
+2) Remove or ignore these (if present)
 
-ITE_18 — Project README
+vendor/ (will be reinstalled)
 
-# ⛺ Pet Adoption — Modern Pet Adoption Platform
+frontend/node_modules/ (will be reinstalled)
 
-A full-stack pet adoption application featuring a Laravel backend and a Next.js frontend, with features for shelters, pets, adopters, adoption requests, and veterinary visit tracking.
+.git/, storage/logs/*
 
-![Pet Adoption](https://img.shields.io/badge/Pet-Adoption-78C000?style=for-the-badge)
-![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react)
-![TypeScript](https://img.shields.io/badge/TypeScript-5+-3178C6?style=for-the-badge&logo=typescript)
-![Laravel](https://img.shields.io/badge/Laravel-12-FF2D20?style=for-the-badge&logo=laravel)
-![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=for-the-badge&logo=mysql)
-![Inertia](https://img.shields.io/badge/Inertia.js-2.0-9553E9?style=for-the-badge)
+Note on .env: If a .env file is included, open and edit it. If it is missing, create a new file named .env and paste the Sanitized .env example found at the bottom of this guide.
 
----
+3) Create the database
 
-## 🎯 Features
+Open phpMyAdmin.
 
-### 🐾 Core Functionality
-- Browse available pets with filters (species, shelter, status)
-- Create/update/delete pets (admin)
-- Adopt applications with status workflows (Pending → Interview → Approved/Rejected)
-- Adopter profiles and document uploads
-- Vet visit tracking per pet
+Create a MySQL database named ite18 or update DB_DATABASE in the .env file to match your database name.
 
-### 🔐 Auth & Security
-- Session-based authentication (Laravel Sanctum / standard sessions)
-- Password hashing with bcrypt
-- Input validation and CSRF protection
+4) Prepare and run the backend
 
-### ⚙️ Admin Tools
-- Shelter management and staff contacts
-- Approve/reject adoption requests and schedule interviews
-- Seeders for test data and admin accounts
+PowerShell
 
----
-
-## 🚀 Quick Start
-
-### Prerequisites
-- PHP 8.1+ (recommended 8.2) with common extensions
-- Composer
-- Node.js 18+ and npm
-- MySQL 8.0+ or MariaDB
-- Git
-
-### Installation
-
-```bash
-# Clone
-git clone https://github.com/jharedmiguelpaderna/Pet-Adoption-.git
-cd Pet-Adoption-
-
-# Install backend deps
+```powershell
+cd C:\path\to\ITE_18
 composer install
 
-# Copy and update env
-cp .env.example .env
-# Edit .env: set DB_DATABASE, DB_USERNAME, DB_PASSWORD, APP_URL
+# Edit .env: set DB_DATABASE, DB_USERNAME (usually root), and DB_PASSWORD
+# Ensure APP_URL=http://127.0.0.1:8000
 
-# Key, migrate, seed
 php artisan key:generate
 php artisan migrate --seed
 php artisan storage:link
+```
 
-# Start Laravel (dev)
+5) Start the backend
+
+With XAMPP/Apache: point the server (DocumentRoot) to the project's public folder and start Apache.
+
+Or run the dev server:
+
+PowerShell
+
+```powershell
 php artisan serve --host=127.0.0.1 --port=8000
+```
 
-# Frontend
+6) Prepare and run the frontend
+
+PowerShell
+
+```powershell
 cd frontend
 npm install
 npm run dev
 ```
 
-### Environment example (minimal)
+If the frontend calls the API, update frontend/.env.local to point to the backend URL (e.g. http://127.0.0.1:8000).
 
-```env
-APP_NAME=PetAdoption
+7) Verify
+
+Backend: http://127.0.0.1:8000/api/... or vhost URL.
+
+Frontend: http://localhost:3000.
+
+8) Notes
+
+Keep composer.lock and package-lock.json in the archive so dependencies are reproducible.
+
+If vendor/ or node_modules/ were excluded, run composer install and npm install after extraction.
+
+If Composer runs out of memory, run: php -d memory_limit=-1 composer install or increase memory in php.ini.
+
+9) Sanitized .env example (safe defaults)
+
+Plaintext
+
+```
+APP_NAME=ITE_18
 APP_ENV=local
 APP_DEBUG=true
 APP_URL=http://127.0.0.1:8000
@@ -97,77 +89,30 @@ APP_URL=http://127.0.0.1:8000
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=pet_adoption
+DB_DATABASE=ite18
 DB_USERNAME=root
 DB_PASSWORD=
 ```
 
----
+This concise checklist covers the common extraction, cleanup and run steps; full details and troubleshooting are below.
 
-## 🗂️ Project Structure
+This repository contains a Laravel backend and a Next.js frontend (in frontend/). The following sections explain how to set up and run the application locally on Windows (development).
 
-```
-Pet-Adoption-
-├── app/                # Laravel app (models, controllers, middleware)
-├── bootstrap/
-├── config/
-├── database/           # migrations & seeders
-├── frontend/           # Next.js frontend (React + TypeScript)
-├── public/             # web root
-├── routes/             # api.php, web.php
-└── README.md           # this file
-```
+Quick Overview
+Backend: Laravel (PHP) — API under routes/api.php
 
----
+Frontend: Next.js in frontend/
 
-## 🧰 Tech Stack
+Postman collection: postman_collection.json
 
-- Frontend: React 19, TypeScript, Next.js, Tailwind CSS, Vite
-- Backend: Laravel 12, Eloquent ORM, Sanctum (or session auth)
-- Database: MySQL 8.0+
-- Dev tooling: Composer, npm
+Prerequisites
+Windows (instructions assume cmd/PowerShell).
 
----
+PHP 8.1+ and Composer (for Laravel).
 
-## 🔎 Highlights & Design Notes
+MySQL (XAMPP or similar) running on default port 3306.
 
-- Server-side caching for heavy endpoints (recommended) to reduce API load.
-- Passport or Sanctum can be added for token-based API access if needed.
-- Use `storage/` for uploaded pet images and `php artisan storage:link` to expose them publicly.
+Node.js 18+ and npm or pnpm (for the frontend).
 
----
+Git (to clone the repo).
 
-## ✅ Deployment Checklist
-
-- Set `APP_ENV=production` and `APP_DEBUG=false` in `.env`
-- Generate `APP_KEY` with `php artisan key:generate`
-- Run `php artisan config:cache` and `php artisan route:cache`
-- Configure secure session driver (Redis recommended)
-
----
-
-## 🤝 Contributing
-
-1. Fork and create a branch
-2. Run `composer install` and `npm install`
-3. Create a PR with a clear description and tests if applicable
-
----
-
-## ⚠️ Files not included
-
-- `.env` (create from `.env.example`)
-- `vendor/` (install via `composer install`)
-- `node_modules/` (install via `npm install`)
-- `storage/logs/`
-
----
-
-## 📞 Support
-
-If you need help with setup or deployment, open an issue in the repository.
-
----
-
-*This README follows the requested structure and is tailored to the Pet Adoption project.*
-  - **Flood** (heavy rain): Floats on water
