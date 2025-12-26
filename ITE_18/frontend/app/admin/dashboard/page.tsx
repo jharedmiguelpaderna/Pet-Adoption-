@@ -10,7 +10,11 @@ import { useNotifications } from '../../../contexts/NotificationContext';
 
 export default function AdminDashboard() {
   const router = useRouter();
-  const [userRole, setUserRole] = useState<UserRole>('admin');
+  // Initialize from local auth snapshot to avoid calling setState during effect
+  const [userRole, setUserRole] = useState<UserRole>(() => {
+    const u = getCurrentUser();
+    return (u && u.role) ? u.role : 'admin';
+  });
   const { refreshNotifications } = useNotifications();
 
   useEffect(() => {
@@ -19,7 +23,6 @@ export default function AdminDashboard() {
       router.push('/');
       return;
     }
-    setUserRole(user.role);
     // Immediately refresh notifications when admin navigates to dashboard
     refreshNotifications();
   }, [router, refreshNotifications]);

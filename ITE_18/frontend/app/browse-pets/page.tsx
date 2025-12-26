@@ -9,23 +9,19 @@ import type { UserRole } from '../../components/AuthPage';
 
 export default function BrowsePets() {
   const router = useRouter();
-  const [userRole, setUserRole] = useState<UserRole | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  // Initialize auth snapshot synchronously to avoid setState in effects
+  const authSnapshot = checkAuthentication();
+  const [userRole, setUserRole] = useState<UserRole | null>(() => authSnapshot.user?.role ?? null);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => !!(authSnapshot.authenticated && authSnapshot.user));
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    const { authenticated, user } = checkAuthentication();
-    
-    if (authenticated && user) {
-      setUserRole(user.role);
-      setIsAuthenticated(true);
-    } else {
-      // Not authenticated - redirect to login
+    if (!isAuthenticated) {
       router.push('/');
       return;
     }
-    setIsLoading(false);
-  }, [router]);
+    // no synchronous state updates here
+  }, [router, isAuthenticated]);
 
   const handleLogout = async () => {
     try {

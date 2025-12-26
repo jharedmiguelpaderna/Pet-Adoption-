@@ -9,22 +9,17 @@ import type { UserRole } from '../../components/AuthPage';
 
 export default function Shelters() {
   const router = useRouter();
-  const [userRole, setUserRole] = useState<UserRole | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const authSnapshot = checkAuthentication();
+  const [userRole, setUserRole] = useState<UserRole | null>(() => authSnapshot.user?.role ?? null);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => !!(authSnapshot.authenticated && authSnapshot.user));
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    const { authenticated, user } = checkAuthentication();
-    
-    if (authenticated && user) {
-      setUserRole(user.role);
-      setIsAuthenticated(true);
-    } else {
+    if (!isAuthenticated) {
       router.push('/');
       return;
     }
-    setIsLoading(false);
-  }, [router]);
+  }, [router, isAuthenticated]);
 
   const handleLogout = async () => {
     try {

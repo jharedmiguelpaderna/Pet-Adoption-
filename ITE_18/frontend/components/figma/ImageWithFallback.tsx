@@ -20,8 +20,12 @@ export function ImageWithFallback({
   const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
-    setImageSource(src);
-    setHasError(false);
+    // Defer state updates slightly to avoid synchronous setState inside effect
+    const id = setTimeout(() => {
+      setImageSource(src);
+      setHasError(false);
+    }, 0);
+    return () => clearTimeout(id);
   }, [src]);
 
   const handleError = () => {

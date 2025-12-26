@@ -1,16 +1,16 @@
 import { useState, FormEvent } from "react";
 import type { UserRole } from "./AuthPage";
-import { API_ENDPOINTS, USE_MOCK_API, cleanupOldProfilePictures, loginAdmin, loginAdopter } from "../utils/api";
+import { USE_MOCK_API, cleanupOldProfilePictures, loginAdmin, loginAdopter } from "../utils/api";
 import { ForgotPasswordModal } from "./ForgotPasswordModal";
 
 interface LoginFormProps {
   role: UserRole;
-  onSuccess?: (role: UserRole, email: string, userData: any, token: string) => void;
+  onSuccess?: (role: UserRole, email: string, userData: Record<string, unknown>, token: string) => void;
 }
 
 // Mock API response for development (only used when USE_MOCK_API = true)
 // When USE_MOCK_API = false, the frontend will use real backend API with seeded database data
-const mockLogin = async (role: UserRole, email: string, password?: string): Promise<any> => {
+const mockLogin = async (role: UserRole, email: string, password?: string): Promise<Record<string, unknown>> => {
   // Simulate network delay
   await new Promise(resolve => setTimeout(resolve, 800));
 
@@ -118,13 +118,21 @@ export function LoginForm({ role, onSuccess }: LoginFormProps) {
             localStorage.setItem("user_role", role);
             localStorage.setItem("user_data", JSON.stringify(userData));
           }
-        } catch (mockError: any) {
-          if (mockError.errors) {
-            const errorMessages = Object.values(mockError.errors).flat();
-            setError(errorMessages[0] as string);
-          } else {
-            setError("The provided credentials are incorrect.");
-          }
+        } catch (mockError: unknown) {
+          const extract = (err: unknown): string | null => {
+            if (!err || typeof err !== 'object') return null;
+            const e = err as Record<string, unknown>;
+            if ('errors' in e && e.errors && typeof e.errors === 'object') {
+              const vals = Object.values(e.errors as Record<string, unknown>);
+              if (vals.length > 0 && Array.isArray(vals[0]) && vals[0].length > 0 && typeof vals[0][0] === 'string') {
+                return vals[0][0] as string;
+              }
+            }
+            return null;
+          };
+
+          const msg = extract(mockError) ?? 'The provided credentials are incorrect.';
+          setError(msg);
           setIsLoading(false);
           return;
         }
@@ -136,20 +144,36 @@ export function LoginForm({ role, onSuccess }: LoginFormProps) {
           } else {
             data = await loginAdopter(email, password);
           }
-        } catch (apiError: any) {
+        } catch (apiError: unknown) {
           // Handle validation errors from Laravel
-          if (apiError.errors) {
-            const errorMessages = Object.values(apiError.errors).flat();
-            setError(errorMessages[0] as string);
-          } else if (apiError.isNetworkError) {
-            // Network error - backend not reachable
-            setError(
-              "Unable to connect to the server. Please check:\n" +
-              "1. Your Laravel backend is running (php artisan serve)\n" +
-              "2. The API_BASE_URL in /utils/api.ts is correct\n" +
-              "3. CORS is configured on your backend\n\n" +
-              "Or set USE_MOCK_API = true in /utils/api.ts to test without backend."
-            );
+          const extract = (err: unknown): string | null => {
+            if (!err || typeof err !== 'object') return null;
+            const e = err as Record<string, unknown>;
+            if ('errors' in e && e.errors && typeof e.errors === 'object') {
+              const vals = Object.values(e.errors as Record<string, unknown>);
+              if (vals.length > 0 && Array.isArray(vals[0]) && vals[0].length > 0 && typeof vals[0][0] === 'string') {
+                return vals[0][0] as string;
+              }
+            }
+            return null;
+          };
+
+          const msgFromErr = extract(apiError);
+          if (msgFromErr) {
+            setError(msgFromErr);
+          } else if (typeof apiError === 'object' && apiError !== null && 'isNetworkError' in apiError) {
+            const ae = apiError as Record<string, unknown>;
+            if (ae.isNetworkError === true) {
+              setError(
+                "Unable to connect to the server. Please check:\n" +
+                "1. Your Laravel backend is running (php artisan serve)\n" +
+                "2. The API_BASE_URL in /utils/api.ts is correct\n" +
+                "3. CORS is configured on your backend\n\n" +
+                "Or set USE_MOCK_API = true in /utils/api.ts to test without backend."
+              );
+            } else {
+              setError("An unexpected error occurred. Please try again.");
+            }
           } else {
             setError("An unexpected error occurred. Please try again.");
           }

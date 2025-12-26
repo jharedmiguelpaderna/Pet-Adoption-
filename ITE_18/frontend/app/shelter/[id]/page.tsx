@@ -11,7 +11,10 @@ export default function ShelterDetail() {
   const router = useRouter();
   const params = useParams();
   const id = params?.id as string;
-  const [userRole, setUserRole] = useState<UserRole>('adopter');
+  const [userRole, setUserRole] = useState<UserRole>(() => {
+    const u = getCurrentUser();
+    return (u && u.role) ? u.role : 'adopter';
+  });
 
   useEffect(() => {
     const user = getCurrentUser();
@@ -19,7 +22,6 @@ export default function ShelterDetail() {
       router.push('/');
       return;
     }
-    setUserRole(user.role);
   }, [router]);
 
   const handleLogout = async () => {
