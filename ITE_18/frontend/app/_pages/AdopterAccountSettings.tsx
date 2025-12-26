@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import NextImage from 'next/image';
 import { ArrowLeft, User, Mail, Phone, MapPin, Calendar, Briefcase, Building, Lock, Bell, History, Users, Camera, Save, PawPrint } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { ProfileSaveModal } from '../../components/ProfileSaveModal';
-import { getUserProfilePicture, setUserProfilePicture, getCurrentUser, getAuthHeaders, API_ENDPOINTS, USE_MOCK_API } from '../../utils/api';
+import { getCurrentUser, getAuthHeaders, API_ENDPOINTS, USE_MOCK_API } from '../../utils/api';
 
 export function AdopterAccountSettings() {
   const router = useRouter();
@@ -187,7 +188,18 @@ export function AdopterAccountSettings() {
       const lastName = nameParts.slice(1).join(' ') || null; // Use null instead of empty string
 
       // Prepare update data - ALWAYS send all editable fields to backend
-      const updateData: any = {
+      const updateData: {
+        first_name: string | null;
+        last_name: string | null;
+        email: string;
+        phone: string | null;
+        address: string | null;
+        birth_date: string | null;
+        pronouns: string | null;
+        occupation: string | null;
+        company_name: string | null;
+        profile_picture: string | null;
+      } = {
         // Required fields - always send
         first_name: firstName.trim() || null,
         last_name: lastName && lastName.trim() ? lastName.trim() : null,
@@ -214,8 +226,9 @@ export function AdopterAccountSettings() {
             headers: getAuthHeaders(),
             body: JSON.stringify(updateData),
           });
-        } catch (fetchError: any) {
-          throw new Error(`Network error: ${fetchError.message || 'Unable to connect to server. Please check if your backend is running.'}`);
+        } catch (fetchError: unknown) {
+          const fetchMessage = fetchError instanceof Error ? fetchError.message : String(fetchError);
+          throw new Error(`Network error: ${fetchMessage || 'Unable to connect to server. Please check if your backend is running.'}`);
         }
 
         if (!response.ok) {
@@ -245,9 +258,10 @@ export function AdopterAccountSettings() {
       
       // Show success modal
     setShowSuccessModal(true);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
       console.error('Error saving profile:', error);
-      alert(error.message || 'Failed to save profile. Please try again.');
+      alert(message || 'Failed to save profile. Please try again.');
     }
   };
 
@@ -320,9 +334,11 @@ export function AdopterAccountSettings() {
           <div className="flex items-center gap-6">
             <div className="relative">
               {formData.profilePicture ? (
-                <img
+                <NextImage
                   src={formData.profilePicture}
                   alt="Profile"
+                  width={128}
+                  height={128}
                   className="w-32 h-32 rounded-full object-cover border-4 border-[#fd7e14]"
                 />
               ) : (

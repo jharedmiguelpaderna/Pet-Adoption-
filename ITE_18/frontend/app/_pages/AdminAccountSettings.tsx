@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import NextImage from 'next/image';
 import { ArrowLeft, User, Mail, Phone, Lock, Bell, Building, Shield, Activity, Camera, Save, PawPrint, Eye } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { ProfileSaveModal } from '../../components/ProfileSaveModal';
-import { getUserProfilePicture, setUserProfilePicture, getCurrentUser, getAuthHeaders, API_ENDPOINTS, USE_MOCK_API } from '../../utils/api';
+import { getCurrentUser, getAuthHeaders, API_ENDPOINTS, USE_MOCK_API } from '../../utils/api';
 
 export function AdminAccountSettings() {
   const router = useRouter();
@@ -140,7 +141,7 @@ export function AdminAccountSettings() {
       }
 
       // Prepare update data - ALWAYS send all editable fields to backend
-      const updateData: any = {
+      const updateData: { name: string; email: string; phone: string | null; profile_picture: string | null } = {
         name: formData.fullName.trim(),
         email: formData.email.trim(),
         phone: formData.phone && formData.phone.trim() ? formData.phone.trim() : null,
@@ -156,8 +157,9 @@ export function AdminAccountSettings() {
             headers: getAuthHeaders(),
             body: JSON.stringify(updateData),
           });
-        } catch (fetchError: any) {
-          throw new Error(`Network error: ${fetchError.message || 'Unable to connect to server. Please check if your backend is running.'}`);
+        } catch (fetchError: unknown) {
+          const fetchMessage = fetchError instanceof Error ? fetchError.message : String(fetchError);
+          throw new Error(`Network error: ${fetchMessage || 'Unable to connect to server. Please check if your backend is running.'}`);
         }
 
         if (!response.ok) {
@@ -187,9 +189,10 @@ export function AdminAccountSettings() {
       
       // Show success modal
       setShowSuccessModal(true);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
       console.error('Error saving profile:', error);
-      alert(error.message || 'Failed to save profile. Please try again.');
+      alert(message || 'Failed to save profile. Please try again.');
     }
   };
 
@@ -302,9 +305,11 @@ export function AdminAccountSettings() {
           <div className="flex items-center gap-6">
             <div className="relative">
               {formData.profilePicture ? (
-                <img
+                <NextImage
                   src={formData.profilePicture}
                   alt="Profile"
+                  width={128}
+                  height={128}
                   className="w-32 h-32 rounded-full object-cover border-4 border-[#fd7e14]"
                 />
               ) : (

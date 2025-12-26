@@ -1,0 +1,4 @@
+{
+  "typescript.tsdk": "ITE_18/frontend/node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true
+}

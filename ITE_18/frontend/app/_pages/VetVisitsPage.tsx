@@ -7,12 +7,15 @@ import { vetVisits as initialVetVisits, isUpcomingVisit, formatVisitDate, VetVis
 import { usePets } from '../../contexts/PetsContext';
 import { ConfirmModal } from '../../components/ConfirmModal';
 import { SuccessBanner } from '../../components/SuccessBanner';
-import { API_ENDPOINTS, getAuthHeaders, USE_MOCK_API } from '../../utils/api';
+import { API_ENDPOINTS, getAuthHeaders, USE_MOCK_API, getCurrentUser } from '../../utils/api';
 
 export function VetVisitsPage() {
   const router = useRouter();
   const { pets, getPetById } = usePets();
-  const [vetVisits, setVetVisits] = useState<VetVisit[]>(initialVetVisits);
+  const [adminShelterIds, setAdminShelterIds] = useState<number[]>([]);
+  const [mounted, setMounted] = useState(false);
+  // Start empty to avoid showing global/mock data during SSR before client-side filtering
+  const [vetVisits, setVetVisits] = useState<VetVisit[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'all' | 'upcoming' | 'past'>('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -53,6 +56,35 @@ export function VetVisitsPage() {
   useEffect(() => {
     fetchVetVisits();
   }, [fetchVetVisits]);
+
+  // track client mount to avoid SSR/CSR markup mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Fetch admin's shelters to limit selectable pets to those shelters
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const cu = getCurrentUser();
+        if (!cu || cu.role !== 'admin') return;
+
+        const headers = getAuthHeaders();
+        const sheltersResponse = await fetch(API_ENDPOINTS.shelters, { headers });
+        if (!sheltersResponse.ok) return;
+
+        const allShelters: { shelter_id: number; admin_id: number }[] = await sheltersResponse.json();
+        if (!mounted) return;
+        const adminShelters = allShelters.filter(s => s.admin_id === cu.user.admin_id);
+        setAdminShelterIds(adminShelters.map(s => s.shelter_id));
+      } catch (error) {
+        console.error('Error fetching admin shelters for vet visits:', error);
+      }
+    })();
+
+    return () => { mounted = false; };
+  }, []);
   
   // Helper function to get pet name by ID
   const getPetNameById = (petId: number): string => {
@@ -516,11 +548,26 @@ export function VetVisitsPage() {
                       className="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl focus:outline-none focus:border-[#fd7e14] font-['Poppins'] bg-white"
                     >
                       <option value="0">Select a pet...</option>
-                      {pets.map(pet => (
-                        <option key={pet.pet_id} value={pet.pet_id}>
-                          {pet.name} ({pet.species})
-                        </option>
-                      ))}
+                      {!mounted ? (
+                        <option disabled>Loading pets...</option>
+                      ) : (
+                        // after mount, show only pets that belong to the admin's shelters
+                        (pets.filter(pet => adminShelterIds.length > 0 ? adminShelterIds.includes(pet.shelter_id) : false)
+                          .map(pet => (
+                            <option key={pet.pet_id} value={pet.pet_id}>
+                              {pet.name} ({pet.species})
+                            </option>
+                          ))).length > 0 ? (
+                          pets.filter(pet => adminShelterIds.length > 0 ? adminShelterIds.includes(pet.shelter_id) : false)
+                            .map(pet => (
+                              <option key={pet.pet_id} value={pet.pet_id}>
+                                {pet.name} ({pet.species})
+                              </option>
+                            ))
+                        ) : (
+                          <option disabled>No pets available</option>
+                        )
+                      )}
                     </select>
                   </div>
 

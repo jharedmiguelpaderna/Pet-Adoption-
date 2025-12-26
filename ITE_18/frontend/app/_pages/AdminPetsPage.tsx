@@ -1,7 +1,7 @@
 'use client';
 
 import { PawPrint, Eye, Edit, Trash2, Plus, Home } from 'lucide-react';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { ViewPetModal } from '../../components/ViewPetModal';
@@ -30,28 +30,32 @@ export function AdminPetsPage() {
     admin_id: number;
   };
 
-  const fetchAdminShelters = useCallback(async () => {
-    try {
-      const user = getCurrentUser();
-      if (!user || user.role !== 'admin') return;
-
-      const headers = getAuthHeaders();
-      const sheltersResponse = await fetch(API_ENDPOINTS.shelters, { headers });
-      if (!sheltersResponse.ok) return;
-      
-      const allShelters: AdminShelter[] = await sheltersResponse.json();
-      const adminShelters = allShelters.filter(
-        (shelter) => shelter.admin_id === user.user.admin_id
-      );
-      setAdminShelterIds(adminShelters.map((shelter) => shelter.shelter_id));
-    } catch (error) {
-      console.error('Error fetching admin shelters:', error);
-    }
-  }, []);
-
   useEffect(() => {
-    fetchAdminShelters();
-  }, [fetchAdminShelters]);
+    let mounted = true;
+    (async () => {
+      try {
+        const user = getCurrentUser();
+        if (!user || user.role !== 'admin') return;
+
+        const headers = getAuthHeaders();
+        const sheltersResponse = await fetch(API_ENDPOINTS.shelters, { headers });
+        if (!sheltersResponse.ok) return;
+
+        const allShelters: AdminShelter[] = await sheltersResponse.json();
+        if (!mounted) return;
+        const adminShelters = allShelters.filter(
+          (shelter) => shelter.admin_id === user.user.admin_id
+        );
+        setAdminShelterIds(adminShelters.map((shelter) => shelter.shelter_id));
+      } catch (error) {
+        console.error('Error fetching admin shelters:', error);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   // Filter pets - only show pets from admin's shelters
   const filteredPets = pets.filter(pet => {
