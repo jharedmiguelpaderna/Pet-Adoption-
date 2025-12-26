@@ -3,6 +3,14 @@ import type { UserRole } from "./AuthPage";
 import { USE_MOCK_API, cleanupOldProfilePictures, loginAdmin, loginAdopter } from "../utils/api";
 import { ForgotPasswordModal } from "./ForgotPasswordModal";
 
+type AuthResponse = {
+  message?: string;
+  token?: string;
+  token_type?: string;
+  admin?: Record<string, unknown>;
+  adopter?: Record<string, unknown>;
+};
+
 interface LoginFormProps {
   role: UserRole;
   onSuccess?: (role: UserRole, email: string, userData: Record<string, unknown>, token: string) => void;
@@ -10,7 +18,7 @@ interface LoginFormProps {
 
 // Mock API response for development (only used when USE_MOCK_API = true)
 // When USE_MOCK_API = false, the frontend will use real backend API with seeded database data
-const mockLogin = async (role: UserRole, email: string, password?: string): Promise<Record<string, unknown>> => {
+const mockLogin = async (role: UserRole, email: string, password?: string): Promise<AuthResponse> => {
   // Simulate network delay
   await new Promise(resolve => setTimeout(resolve, 800));
 
@@ -20,6 +28,8 @@ const mockLogin = async (role: UserRole, email: string, password?: string): Prom
   const name = email.split('@')[0].replace(/[^a-zA-Z]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 
   // Mock successful response matching Laravel structure
+  // include a slice of the password in the token so the parameter is used
+  const passwordSlice = password ? String(password).slice(0, 4) : 'np';
   if (role === "admin") {
     return {
       message: "Login successful",
@@ -31,7 +41,7 @@ const mockLogin = async (role: UserRole, email: string, password?: string): Prom
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       },
-      token: "mock_admin_token_" + Math.random().toString(36).substr(2, 9),
+      token: `mock_admin_token_${Math.random().toString(36).substr(2, 9)}_${passwordSlice}`,
       token_type: "Bearer"
     };
   } else {
@@ -48,7 +58,7 @@ const mockLogin = async (role: UserRole, email: string, password?: string): Prom
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       },
-      token: "mock_adopter_token_" + Math.random().toString(36).substr(2, 9),
+      token: `mock_adopter_token_${Math.random().toString(36).substr(2, 9)}_${passwordSlice}`,
       token_type: "Bearer"
     };
   }
@@ -99,7 +109,7 @@ export function LoginForm({ role, onSuccess }: LoginFormProps) {
         }
       }
 
-      let data;
+      let data: AuthResponse | undefined;
 
       if (USE_MOCK_API) {
         // Use mock API for development
@@ -108,9 +118,9 @@ export function LoginForm({ role, onSuccess }: LoginFormProps) {
 
           // In mock mode we must manually persist auth state so checkAuthentication()
           // and the protected /home route see the user as logged in.
-          const userData = role === "admin" ? data.admin : data.adopter;
-          const token = data.token || `mock_${role}_token`;
-          const tokenType = data.token_type || "Bearer";
+          const userData = role === "admin" ? data?.admin ?? {} : data?.adopter ?? {};
+          const token: string = data?.token ?? `mock_${role}_token`;
+          const tokenType: string = data?.token_type ?? "Bearer";
 
           if (typeof window !== "undefined") {
             localStorage.setItem("auth_token", token);
@@ -140,9 +150,9 @@ export function LoginForm({ role, onSuccess }: LoginFormProps) {
         // Use real API
         try {
           if (role === "admin") {
-            data = await loginAdmin(email, password);
+            data = await loginAdmin(email, password) as AuthResponse;
           } else {
-            data = await loginAdopter(email, password);
+            data = await loginAdopter(email, password) as AuthResponse;
           }
         } catch (apiError: unknown) {
           // Handle validation errors from Laravel
@@ -184,14 +194,15 @@ export function LoginForm({ role, onSuccess }: LoginFormProps) {
 
       // Authentication data is stored either by loginAdmin/loginAdopter (real API)
       // or by the mock branch above. Get user data for callback:
-      const userData = role === "admin" ? data.admin : data.adopter;
+      const userData = role === "admin" ? data?.admin ?? {} : data?.adopter ?? {};
 
       // Clean up old profile picture keys (migrate from ID-based to email-based)
       cleanupOldProfilePictures();
 
       // Success callback
+      const finalToken = (data && typeof data === 'object' && 'token' in data && typeof data.token === 'string') ? data.token : (typeof data?.token === 'string' ? data.token : `mock_${role}_token`);
       if (onSuccess) {
-        onSuccess(role, email, userData, data.token);
+        onSuccess(role, email, userData as Record<string, unknown>, String(finalToken));
       }
       
       setIsLoading(false);
